@@ -50,8 +50,7 @@
       <span class="label">Spiciness:</span>
       <select id="difficulty">
         <option value="easy" selected>SFW</option>
-        <option value="medium">Some NSFW</option>
-        <option value="hard">All NSFW</option>
+        <option value="medium">NSFW</option>
       </select>
     </label>
     <label>
@@ -221,59 +220,27 @@
       // ...add more!
     ];
 
-// Spice Factory
-const DIFFICULTY_DISTRIBUTIONS = {
-  easy:   { easy: 24, medium: 0, hard: 0 },
-  medium: { easy: 12, medium: 12, hard: 0 },
-  hard:   { easy: 0, medium: 24, hard: 0 }
-};
-const GRID_SIZE = 5;
-const CENTER_INDEX = 12; // for 5x5
+ const DIFFICULTIES = ["easy", "medium",];
+    const GRID_SIZE = 5;
 
-function pickRandom(arr, count) {
-  const copy = arr.slice();
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy.slice(0, count);
-}
+    function getFilteredGoals(difficulty, includeExtreme, includeMonster) {
+      return GOALS.filter(
+        goal =>
+          DIFFICULTIES.indexOf(goal.difficulty) <= DIFFICULTIES.indexOf(difficulty) &&
+          (includeExtreme || !goal.extreme) &&
+          (includeMonster || !goal.monster)
+      );
+    }
 
-function generateCard() {
-  const diff = document.getElementById('difficulty').value;
-  const extreme = document.getElementById('extreme').checked;
-  const monster = document.getElementById('monster').checked;
+    function pickRandom(arr, count) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy.slice(0, count);
+    }
 
-  // Build separate pools for each difficulty
-  const pools = {};
-  ['easy', 'medium', 'hard'].forEach(level => {
-    pools[level] = GOALS.filter(
-      goal =>
-        goal.difficulty === level &&
-        (extreme || !goal.extreme)
-        (monster || !goal.monster)
-    );
-  });
-
-  // Draw required number from each pool
-  const dist = DIFFICULTY_DISTRIBUTIONS[diff];
-  let goals = [];
-  for (const level of ['easy', 'medium', 'hard']) {
-    goals = goals.concat(pickRandom(pools[level], dist[level]));
-  }
-
-  // Shuffle the result
-  goals = pickRandom(goals, goals.length);
-
-  // Insert the free space in the center
-  goals.splice(CENTER_INDEX, 0, {
-    text: "FREE SPACE",
-    difficulty: "",
-    extreme: false,
-    free: true
-  });
-
-   //  RENDER BINGO GRID 
     function renderCard(goals) {
       const grid = document.getElementById('bingo');
       grid.innerHTML = '';
@@ -291,6 +258,23 @@ function generateCard() {
         }
         grid.appendChild(div);
       }
+    }
+
+    function generateCard() {
+      const diff = document.getElementById('difficulty').value;
+      const extreme = document.getElementById('extreme').checked;
+      const monster = document.getElementById('monster').checked;
+      const filtered = getFilteredGoals(diff, extreme, monster);
+      const numGoals = GRID_SIZE * GRID_SIZE - 1;
+      const cardGoals = pickRandom(filtered, numGoals);
+      // Insert free space in the center
+      cardGoals.splice(12, 0, {
+        text: "FREE SPACE",
+        difficulty: "",
+        extreme: false,
+        free: true
+      });
+      renderCard(cardGoals);
     }
 
     document.getElementById('generate').addEventListener('click', generateCard);
