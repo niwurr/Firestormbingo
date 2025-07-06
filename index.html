@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo Client</title>
+  <style>
+    body { font-family: sans-serif; background: #d4d4d4; padding: 24px;}
+    .controls { margin-bottom: 20px; }
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .bingo-cell {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 16px 8px;
+      min-height: 60px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      user-select: none;
+    }
+    .bingo-cell.checked { background: #875caa; }
+    .bingo-cell.extreme { background: #ffabab; }
+    .bingo-cell.extreme.checked { background: #ad4040; }
+    .bingo-cell.free {
+      background: #e3e3ff !important;
+      font-weight: bold;
+      color: #444;
+      border: 2px dashed #9c9cff;
+      cursor: default;
+    }
+    .bingo-cell.free.checked { background: #875caa !important; }
+    .label { margin-right: 8px; }
+    .controls label { margin-right: 20px;}
+    @media (max-width: 600px) {
+      .bingo-grid { max-width: 99vw; }
+      .bingo-cell { padding: 8px 2px; font-size: 14px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>
+      <span class="label">Difficulty:</span>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </label>
+    <label>
+      <input type="checkbox" id="extreme" />
+      Include "Extreme" Goals
+    </label>
+    <button id="generate">Generate New Card</button>
+  </div>
+  <div id="bingo" class="bingo-grid"></div>
+  <script>
+    // Random Sample Goals ((Will work on real goals))
+    const GOALS = [
+      { text: "Kith", difficulty: "easy", extreme: false },
+      { text: "Slorp", difficulty: "hard", extreme: true },
+      { text: "Lizzer", difficulty: "medium", extreme: false },
+      { text: "meep", difficulty: "hard", extreme: true },
+      { text: "4", difficulty: "easy", extreme: false },
+      { text: "5", difficulty: "medium", extreme: false },
+      { text: "6", difficulty: "easy", extreme: false },
+      { text: "7 a new sport", difficulty: "medium", extreme: false },
+      { text: "8 for 24 hours", difficulty: "hard", extreme: true },
+      { text: "9 a poem", difficulty: "easy", extreme: false },
+      { text: "10 sunrise", difficulty: "easy", extreme: false },
+      { text: "11", difficulty: "medium", extreme: false },
+      { text: "12 phone for a day", difficulty: "hard", extreme: true },
+      { text: "13", difficulty: "medium", extreme: false },
+      { text: "14 a tree", difficulty: "medium", extreme: false },
+      { text: "15", difficulty: "medium", extreme: false },
+      { text: "16", difficulty: "easy", extreme: false },
+      { text: "17", difficulty: "hard", extreme: true },
+      { text: "18", difficulty: "hard", extreme: true },
+      { text: "19", difficulty: "medium", extreme: false },
+      { text: "20", difficulty: "easy", extreme: false },
+      { text: "21", difficulty: "easy", extreme: false },
+      { text: "22", difficulty: "easy", extreme: false },
+      { text: "23", difficulty: "easy", extreme: false },
+      { text: "24", difficulty: "medium", extreme: false },
+      { text: "Have beef with baby", difficulty: "easy", extreme:false}
+      // ...add more!
+    ];
+
+    const DIFFICULTIES = ["easy", "medium", "hard"];
+    const GRID_SIZE = 5;
+
+    function getFilteredGoals(difficulty, includeExtreme) {
+      return GOALS.filter(
+        goal =>
+          DIFFICULTIES.indexOf(goal.difficulty) <= DIFFICULTIES.indexOf(difficulty) &&
+          (includeExtreme || !goal.extreme)
+      );
+    }
+
+    function pickRandom(arr, count) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy.slice(0, count);
+    }
+
+    function renderCard(goals) {
+      const grid = document.getElementById('bingo');
+      grid.innerHTML = '';
+      for (let i = 0; i < goals.length; i++) {
+        const goal = goals[i];
+        const div = document.createElement('div');
+        div.className = 'bingo-cell' + (goal.extreme ? ' extreme' : '') + (goal.free ? ' free' : '');
+        div.textContent = goal.text;
+        if (!goal.free) {
+          div.addEventListener('click', function() {
+            div.classList.toggle('checked');
+          });
+        } else {
+          div.classList.add('checked');
+        }
+        grid.appendChild(div);
+      }
+    }
+
+    function generateCard() {
+      const diff = document.getElementById('difficulty').value;
+      const extreme = document.getElementById('extreme').checked;
+      const filtered = getFilteredGoals(diff, extreme);
+      const numGoals = GRID_SIZE * GRID_SIZE - 1;
+      const cardGoals = pickRandom(filtered, numGoals);
+      // Insert free space in the center
+      cardGoals.splice(12, 0, {
+        text: "FREE SPACE",
+        difficulty: "",
+        extreme: false,
+        free: true
+      });
+      renderCard(cardGoals);
+    }
+
+    document.getElementById('generate').addEventListener('click', generateCard);
+    window.addEventListener('DOMContentLoaded', generateCard);
+  </script>
+</body>
+</html>
