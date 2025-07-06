@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bingo Client</title>
+  <title>Firestorm Bingo Client</title>
   <style>
     body { font-family: sans-serif; background: #d4d4d4; padding: 24px;}
     .controls { margin-bottom: 20px; }
@@ -25,7 +25,9 @@
     }
     .bingo-cell.checked { background: #875caa; }
     .bingo-cell.extreme { background: #ffabab; }
+    .bingo-cell.monster { background: #ee5c6f; }
     .bingo-cell.extreme.checked { background: #ad4040; }
+    .bingo-cell.monster.checked { background: #a51c1c;}
     .bingo-cell.free {
       background: #e3e3ff !important;
       font-weight: bold;
@@ -45,106 +47,233 @@
 <body>
   <div class="controls">
     <label>
-      <span class="label">Difficulty:</span>
+      <span class="label">Spiciness:</span>
       <select id="difficulty">
-        <option value="easy">Easy</option>
-        <option value="medium" selected>Medium</option>
-        <option value="hard">Hard</option>
+        <option value="easy">SFW</option>
+        <option value="medium" selected>Some NSFW</option>
+        <option value="hard">All NSFW</option>
       </select>
     </label>
     <label>
       <input type="checkbox" id="extreme" />
       Include "Extreme" Goals
     </label>
+    <label>
+      <input type="checkbox" id="monster" />
+      Include "Monster" Goals
+    </label>
     <button id="generate">Generate New Card</button>
   </div>
   <div id="bingo" class="bingo-grid"></div>
   <script>
-    // Random Sample Goals ((Will work on real goals))
+    // GOAL LIST HERE IF IT WASNT CLEAR
     const GOALS = [
-      { text: "Kith", difficulty: "easy", extreme: false },
-      { text: "Slorp", difficulty: "hard", extreme: true },
-      { text: "Lizzer", difficulty: "medium", extreme: false },
-      { text: "meep", difficulty: "hard", extreme: true },
-      { text: "4", difficulty: "easy", extreme: false },
-      { text: "5", difficulty: "medium", extreme: false },
-      { text: "6", difficulty: "easy", extreme: false },
-      { text: "7 a new sport", difficulty: "medium", extreme: false },
-      { text: "8 for 24 hours", difficulty: "hard", extreme: true },
-      { text: "9 a poem", difficulty: "easy", extreme: false },
-      { text: "10 sunrise", difficulty: "easy", extreme: false },
-      { text: "11", difficulty: "medium", extreme: false },
-      { text: "12 phone for a day", difficulty: "hard", extreme: true },
-      { text: "13", difficulty: "medium", extreme: false },
-      { text: "14 a tree", difficulty: "medium", extreme: false },
-      { text: "15", difficulty: "medium", extreme: false },
-      { text: "16", difficulty: "easy", extreme: false },
-      { text: "17", difficulty: "hard", extreme: true },
-      { text: "18", difficulty: "hard", extreme: true },
-      { text: "19", difficulty: "medium", extreme: false },
-      { text: "20", difficulty: "easy", extreme: false },
-      { text: "21", difficulty: "easy", extreme: false },
-      { text: "22", difficulty: "easy", extreme: false },
-      { text: "23", difficulty: "easy", extreme: false },
-      { text: "24", difficulty: "medium", extreme: false },
-      { text: "Have beef with baby", difficulty: "easy", extreme:false}
+        //Easy/SFW Goals
+      { text: "Holding Hands", difficulty: "easy", extreme: false, monster: false },
+      { text: "First Kiss", difficulty: "easy", extreme: false, monster: false},
+      { text: "Tying a Tie", difficulty: "easy", extreme: false, monster: false},
+      { text: "Hurt/comfort", difficulty: "easy", extreme: false, monster: false},
+      { text: "Trip to Martha's Rest", difficulty: "easy", extreme: false, monster: false},
+      { text: "Meet Cute", difficulty: "easy", extreme: false, monster: false},
+      { text: "Anniversary", difficulty: "easy", extreme: false, monster: false},
+      { text: "Proposal", difficulty: "easy", extreme: false, monster: false},
+      { text: "Sickfic", difficulty: "easy", extreme: false, monster: false},
+      { text: "Wedding/Bridal Carry", difficulty: "easy", extreme: false, monster: false},
+      { text: "Kabedon", difficulty: "easy", extreme: false, monster: false},
+      { text: "Indirect Kiss", difficulty: "easy", extreme: false, monster: false},
+      { text: "Cooking Together", difficulty: "easy", extreme: false, monster: false},
+      { text: "Sharing an Umbrella", difficulty: "easy", extreme: false, monster: false},
+      { text: "Stargazing", difficulty: "easy", extreme: false, monster: false},
+      { text: "Cuddling", difficulty: "easy", extreme: false, monster: false},
+      { text: "First Date", difficulty: "easy", extreme: false, monster: false},
+      { text: "Confession", difficulty: "easy", extreme: false, monster: false},
+      { text: "Secret Admirer", difficulty: "easy", extreme: false, monster: false},
+      { text: "Fireworks Together", difficulty: "easy", extreme: false, monster: false},
+      { text: "Beach Day", difficulty: "easy", extreme: false, monster: false},
+      { text: "Movie Night", difficulty: "easy", extreme: false, monster: false},
+      { text: "Picnic in the Park", difficulty: "easy", extreme: false, monster: false},
+      { text: "Matching Outfits", difficulty: "easy", extreme: false, monster: false},
+      { text: "Shared Blanket Fort", difficulty: "easy", extreme:false, monster:false },
+      { text: "Lizzer", difficulty: "easy", extreme: false, monster: false },
+      { text: "Pining", difficulty: "easy", extreme: false, monster: false },
+      { text: "Forehead Kisses/Touch", difficulty: "easy", extreme: false, monster: false },
+      { text: "Body Swap", difficulty: "easy", extreme: false, monster: false },
+      { text: "Soul Mates", difficulty: "easy", extreme: false, monster: false },
+      { text: "Sharing/Swapping Clothes", difficulty: "easy", extreme: false, monster: false },
+      { text: "Fix-It", difficulty: "easy", extreme: false, monster: false },
+      { text: "Dancing", difficulty: "easy", extreme: false, monster: false },
+      { text: "AU/Crossover", difficulty: "easy", extreme: false, monster: false },
+      { text: "Costumes", difficulty: "easy", extreme: false, monster: false },
+      { text: "PDA", difficulty: "easy", extreme: false, monster: false },
+      { text: "Shared Body Heat", difficulty: "easy", extreme: false, monster: false },
+      { text: "Cuddling", difficulty: "easy", extreme: false, monster: false },
+      { text: "Waiting Out The Weather", difficulty: "easy", extreme: false, monster: false },
+      { text: "Cooking", difficulty: "easy", extreme: false, monster: false },
+      { text: "Kissing Hand", difficulty: "easy", extreme: false, monster: false },
+      { text: "Blind Date", difficulty: "easy", extreme: false, monster: false },
+      { text: "Bathing/Onsen", difficulty: "easy", extreme: false, monster: false },
+      { text: "Taking a Shortcut", difficulty: "easy", extreme: false, monster: false },
+       
+      //Medium/ NSFW Goals
+      { text: "Bondage", difficulty: "medium", extreme: false, monster: false },
+      { text: "69", difficulty: "medium", extreme: false, monster: false },
+      { text: "Shibari", difficulty: "medium", extreme: false, monster: false },
+      { text: "Trip to The Veil", difficulty: "medium", extreme: false, monster: false },
+      { text: "Electrostim", difficulty: "medium", extreme: false, monster: false },
+      { text: "Waxplay", difficulty: "medium", extreme: false, monster: false },
+      { text: "In Public", difficulty: "medium", extreme: false, monster: false },
+      { text: "Edging", difficulty: "medium", extreme: false, monster: false },
+      { text: "Pet Play", difficulty: "medium", extreme: false, monster: false },
+      { text: "Dub-Con/CNC", difficulty: "medium", extreme: false, monster: false },
+      { text: "Exhibitionism", difficulty: "medium", extreme: false, monster: false },
+      { text: "Breath Play", difficulty: "medium", extreme: false, monster: false },
+      { text: "Blindfold", difficulty: "medium", extreme: false, monster: false },
+      { text: "Breeding Kink", difficulty: "medium", extreme: false, monster: false },
+      { text: "Dacryphilia", difficulty: "medium", extreme: false, monster: false },
+      { text: "Masturbation", difficulty: "medium", extreme: false, monster: false },
+      { text: "Boot Worship", difficulty: "medium", extreme:false, monster:false },
+      { text: "Body Worship", difficulty: "medium", extreme:false, monster:false },
+      { text: "Gloves", difficulty: "medium", extreme:false, monster:false },
+      { text: "Scent Kink", difficulty: "medium", extreme:false, monster:false },
+      { text: "Clothed/unclothed", difficulty:"medium", extreme:false, monster:false},
+      { text: "Roleplay" ,difficulty:"medium" ,extreme:false ,monster:false},
+      { text: "Daddy/Sir" ,difficulty:"medium" ,extreme:false ,monster:false},
+      { text: "Body Swap" ,difficulty:"medium" ,extreme:false ,monster:false},
+      { text: "Consensual Somnophilia" ,difficulty:"medium" ,extreme:false ,monster:false},
+      { text: "Biting" ,difficulty:"medium" ,extreme:false ,monster:false},
+      { text: "Phone Sex", difficulty: "medium", extreme: false, monster: false },
+      { text: "Sex Pollen/Aphrodisiacs", difficulty: "medium", extreme: false, monster: false },
+      { text: "Lingerie", difficulty: "medium", extreme: false, monster: false },
+      { text: "Dirty Talk", difficulty: "medium", extreme: false, monster: false },
+      { text: "Overstim", difficulty: "medium", extreme: false, monster: false },
+      { text: "Voice Kink", difficulty: "medium", extreme: false, monster: false },
+      { text: "Praise Kink", difficulty: "medium", extreme: false, monster: false },
+      { text: "Begging", difficulty: "medium", extreme: false, monster: false },
+      { text: "Priest Kink", difficulty: "medium", extreme: false, monster: false },
+      { text: "Nurse/Doctor", difficulty: "medium", extreme: false, monster: false },
+      { text: "Threesome", difficulty: "medium", extreme: false, monster: false },
+      { text: "Degradation", difficulty: "medium", extreme: false, monster: false },
+      { text: "Sex Toys", difficulty: "medium", extreme: false, monster: false },
+      { text: "Stuck in a Wall/Hole", difficulty: "medium", extreme: false, monster: false },
+      { text: "Heat/Rut", difficulty: "medium", extreme: false, monster: false },
+      { text: "Fallen Tech", difficulty: "medium", extreme: false, monster: false },
+      { text: "Prey/Predator", difficulty: "medium", extreme: false, monster: false },
+      { text: "Size Queen", difficulty: "medium", extreme: false, monster: false },
+      { text: "Coming Early", difficulty: "medium", extreme: false, monster: false },
+      { text: "Ruined Orgasm", difficulty: "medium", extreme: false, monster: false },
+      { text: "Coming Untouched", difficulty: "medium", extreme:false, monster:false},
+      { text: "Morning Sex", difficulty: "medium", extreme: false, monster: false },
+      { text: "Cockwarming", difficulty: "medium", extreme: false, monster: false },
+      { text: "Glory Hole", difficulty: "medium", extreme: false, monster: false },
+      { text: "Eikonic Powers", difficulty: "medium", extreme: false, monster: false },
+      { text: "Cock Cage", difficulty: "medium", extreme: false, monster: false },
+      { text: "Collaring", difficulty: "medium", extreme: false, monster: false },
+      { text: "Blow Jobs", difficulty: "medium", extreme: false, monster: false },
+      { text: "Frotting", difficulty: "medium", extreme: false, monster: false },
+      { text: "Rimming", difficulty: "medium", extreme: false, monster: false },
+      { text: "Lap Dance", difficulty: "medium", extreme: false, monster: false },
+      { text: "Strip Tease", difficulty: "medium", extreme: false, monster: false },
+      { text: "Gender Swap", difficulty: "medium", extreme: false, monster: false },
+      { text: "Only One Bed/floor", difficulty: "medium", extreme: false, monster: false },
+
+      // Monsterfuckers here
+      { text: "Eikon on Eikon", difficulty: "medium", extreme: false, monster: true },
+      { text: "Eikon on Human", difficulty: "medium", extreme: false, monster: true },
+      { text: "Size Difference", difficulty: "medium", extreme: false, monster: true },
+      { text: "WereCoeurl!Cid", difficulty: "easy", extreme: false, monster: true },
+      { text: "Werewolf!Clive", difficulty: "easy", extreme: false, monster: true },
+      { text: "Semi-Primed", difficulty: "medium", extreme: false, monster: true },
+      { text: "Tail Shenanigans", difficulty: "medium", extreme: false, monster: true },
+      { text: "Tentacles", difficulty: "medium", extreme: false, monster: true },
+      { text: "Lizzer ;)", difficulty: "medium", extreme: false, monster: true },
+      { text: "Wyvern/Coeurl", difficulty: "medium", extreme: false, monster: true },
+      { text: "Slime/Flan", difficulty: "medium", extreme: false, monster: true },
+      { text: "Minotaur/Orc/Ogre", difficulty: "medium", extreme: false, monster: true },
+      { text: "Oviposition", difficulty: "medium", extreme: false, monster: true },
+      { text: "Merman", difficulty: "easy", extreme: false, monster: true },
+      { text: "Vampire", difficulty: "easy", extreme: false, monster: true },
+      { text: "Succubus", difficulty: "medium", extreme: false, monster: true },
+      { text: "Vore", difficulty: "medium", extreme: false, monster: true },
+      { text: "Akashic/Zombie", difficulty: "easy", extreme: false, monster: true },
+      { text: "Animal-like (ie. Viera)", difficulty: "easy", extreme: false, monster: true },
+      { text: "Tummy bulge", difficulty: "medium", extreme: false, monster: true },
+
+      // Extreme
+      { text: "NTR", difficulty: "medium", extreme: true, monster: false },
+      { text: "Watersports", difficulty: "medium", extreme: true, monster: false },
+      { text: "Blood Play", difficulty: "medium", extreme: true, monster: false },
+      { text: "Knife Play", difficulty: "medium", extreme: true, monster: false },
+      { text: "Cannibalism", difficulty: "medium", extreme: true, monster: false },
+      { text: "Ultima Mind Control", difficulty: "medium", extreme: true, monster: false },
+      { text: "Non-Con", difficulty: "medium", extreme: true, monster: false },
+      { text: "Piercing Play", difficulty: "medium", extreme: true, monster: false },
+      { text: "Public Use", difficulty: "medium", extreme: true, monster: false },
+      { text: "Torture", difficulty: "medium", extreme: true, monster: false },
+      { text: "CBT", difficulty: "medium", extreme: true, monster: false },
+      { text: "Dub/Noncon Somnophilia", difficulty: "medium", extreme: true, monster: false },
+      { text: "Mind Break", difficulty: "medium", extreme: true, monster: false },
+      { text: "Main Character Death", difficulty: "medium", extreme: true, monster: false },
+      { text: "Fuck or Die", difficulty: "medium", extreme: true, monster: false },
+      { text: "Pain Play", difficulty: "medium", extreme: true, monster: false},
+      { text: "Heat/Rut", difficulty: "medium", extreme: true, monster: false},
+      { text: "Body Mutilation", difficulty: "medium", extreme: true, monster: false},
+      { text: "Necrophilia", difficulty: "medium", extreme: true, monster: false},
       // ...add more!
     ];
 
-    const DIFFICULTIES = ["easy", "medium", "hard"];
-    const GRID_SIZE = 5;
+    const DIFFICULTY_DISTRIBUTIONS = {
+  easy:   { easy: 24, medium: 0, hard: 0 },
+  medium: { easy: 12, medium: 12, hard: 0 },
+  hard:   { easy: 0, medium: 24, hard: 0 }
+};
+const GRID_SIZE = 5;
+const CENTER_INDEX = 12; // for 5x5
 
-    function getFilteredGoals(difficulty, includeExtreme) {
-      return GOALS.filter(
-        goal =>
-          DIFFICULTIES.indexOf(goal.difficulty) <= DIFFICULTIES.indexOf(difficulty) &&
-          (includeExtreme || !goal.extreme)
-      );
-    }
+function pickRandom(arr, count) {
+  const copy = arr.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, count);
+}
 
-    function pickRandom(arr, count) {
-      const copy = arr.slice();
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy.slice(0, count);
-    }
+function generateCard() {
+  const diff = document.getElementById('difficulty').value;
+  const extreme = document.getElementById('extreme').checked;
+  const monster = document.getElementById('monster').checked;
 
-    function renderCard(goals) {
-      const grid = document.getElementById('bingo');
-      grid.innerHTML = '';
-      for (let i = 0; i < goals.length; i++) {
-        const goal = goals[i];
-        const div = document.createElement('div');
-        div.className = 'bingo-cell' + (goal.extreme ? ' extreme' : '') + (goal.free ? ' free' : '');
-        div.textContent = goal.text;
-        if (!goal.free) {
-          div.addEventListener('click', function() {
-            div.classList.toggle('checked');
-          });
-        } else {
-          div.classList.add('checked');
-        }
-        grid.appendChild(div);
-      }
-    }
+  // Build separate pools for each difficulty
+  const pools = {};
+  ['easy', 'medium', 'hard'].forEach(level => {
+    pools[level] = GOALS.filter(
+      goal =>
+        goal.difficulty === level &&
+        (extreme || !goal.extreme)
+        (monster || !goal.monster)
+    );
+  });
 
-    function generateCard() {
-      const diff = document.getElementById('difficulty').value;
-      const extreme = document.getElementById('extreme').checked;
-      const filtered = getFilteredGoals(diff, extreme);
-      const numGoals = GRID_SIZE * GRID_SIZE - 1;
-      const cardGoals = pickRandom(filtered, numGoals);
-      // Insert free space in the center
-      cardGoals.splice(12, 0, {
-        text: "FREE SPACE",
-        difficulty: "",
-        extreme: false,
-        free: true
-      });
-      renderCard(cardGoals);
-    }
+  // Draw required number from each pool
+  const dist = DIFFICULTY_DISTRIBUTIONS[diff];
+  let goals = [];
+  for (const level of ['easy', 'medium', 'hard']) {
+    goals = goals.concat(pickRandom(pools[level], dist[level]));
+  }
+
+  // Shuffle the result
+  goals = pickRandom(goals, goals.length);
+
+  // Insert the free space in the center
+  goals.splice(CENTER_INDEX, 0, {
+    text: "FREE SPACE",
+    difficulty: "",
+    extreme: false,
+    free: true
+  });
+
+  renderCard(goals);
+}
 
     document.getElementById('generate').addEventListener('click', generateCard);
     window.addEventListener('DOMContentLoaded', generateCard);
